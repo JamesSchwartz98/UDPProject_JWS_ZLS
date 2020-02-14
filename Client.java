@@ -2,51 +2,44 @@ import java.net.*;
 import java.io.*;
 
 public class Client{
-    private Socket socket = null;
-    private DataInputStream input = null;
-    private DataOutputStream output = null;
-    
-    public Client(String address, int port){
-        try{
-            socket = new Socket(address, port);
-            System.out.println("Connection Established");
-        
-            input = new DataInputStream(System.in);
-            output = new DataOutputStream(socket.getOutputStream());
-        } // end terminal request
-        
-        catch(UnknownHostException u){
-            System.out.println(u); //come back to assess
-        }
-        catch(IOException i){
-            System.out.println(i);
-        }
-    
-        String line = "";
-        
-        while(!line.equals("END")){
-            try{
-                line = input.readLine();
-                output.writeUTF(line);
-            }
-            catch(IOException i){
-                System.out.println(i);
-            }
-        }//end input termination
-        
-        //closing connection
-        try{
-            input.close();
-            output.close();
-            socket.close();
-        }
-        catch(IOException i){
-            System.out.println(i);
-        }
-    }//end Client method
-
     public static void main(String args[]){
-        Client client = new Client("127.0.0.1", 2025);
-    }
-
+        if(args.length<2){
+            System.out.println("Syntax: QuoteClient <hostname> <port>");
+            return;
+        }
+        
+        String hostname = args[0];
+        int port = Integer.parseInt(args[1]);
+        
+        try{
+            InetAddress address = InetAddress.getByName(hostname);
+            DatagramSocket socket = new DatagramSocket();
+            
+            while(true){
+                DatagramPacket request = new DatagramPacket(new byte[1], 1, address, port);
+                socket.send(request);
+                
+                byte[] buffer = new byte[512];
+                DatagramPacket response = new DatagramPacket(buffer, buffer.length);
+                socket.receive(response);
+                String quote = new String(buffer, 0, response.getLength());
+                
+                System.out.println(quote);
+                System.out.println();
+                
+                Thread.sleep(10000);
+            }
+        }
+        catch(SocketTimeoutException ex){
+            System.out.println("Timeout error: "+ex.getMessage());
+            ex.printStackTrace();
+        }
+        catch(InterruptedException ex){
+            ex.printStackTrace();
+        }
+        catch(IOException ex){
+            System.out.println("Client error: "+ex.getMessage());
+            ex.printStackTrace();
+        } // end IOException
+    }//end main string
 } // end Client class
