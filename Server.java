@@ -1,6 +1,7 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import java.text.*;
 
 public class Server{
     private DatagramSocket socket;
@@ -13,19 +14,17 @@ public class Server{
     }//end Server method
     
     public static void main(String[] args){
-        if(args.length<2){
-            System.out.println("Syntax Server <file> <port>");
-            return;
-        }
-        
-        String quoteFile = args[0];
-        int port = Integer.parseInt(args[1]);
+        String quoteFile = "quote.csv";
+        int port = 2025;
         
         try{
+            DateFormat dateForm = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            Date date = new Date();
             Server server = new Server(port);
+            System.out.println("Server started "+dateForm.format(date));
             server.loadQuote(quoteFile);
-            server.service();
-        }//end the try
+            server.quoteRequestLoop();
+        }
         catch(SocketException ex){
             System.out.println("Socket error: "+ex.getMessage());
         } // end Socket Exception
@@ -34,12 +33,12 @@ public class Server{
         } // end IOException
     } // end main method
     
-    private void service() throws IOException{
+    private void quoteRequestLoop() throws IOException{
         while(true){
             DatagramPacket request = new DatagramPacket(new byte[1], 1);
             socket.receive(request);
             
-            String quote = getRandomQuote();
+            String quote = getQuote();
             byte[] buffer = quote.getBytes();
             
             InetAddress clientAddress = request.getAddress();
@@ -47,8 +46,14 @@ public class Server{
             
             DatagramPacket response = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
             socket.send(response);
+            
+            DateFormat dateForm = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            Date date = new Date();
+            String requestString = "Request received from "+ clientAddress+": "+clientPort+" "+dateForm.format(date);
+            System.out.println(requestString);
+            System.out.println();
         }
-    }//end void service
+    }//end void quoteRequests
     
     private void loadQuote(String quoteFile) throws IOException{
         BufferedReader reader = new BufferedReader(new FileReader(quoteFile));
@@ -60,9 +65,25 @@ public class Server{
         reader.close();
     }// end loadQuote
     
-    private String getRandomQuote(){
+    private String getQuote(){
         int randomIndex = random.nextInt(listQuotes.size());
         String randomQuote = listQuotes.get(randomIndex);
         return randomQuote;
-    }
+    }//end getQuote method
 }//end Server class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
