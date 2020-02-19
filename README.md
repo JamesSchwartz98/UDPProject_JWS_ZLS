@@ -6,7 +6,7 @@
  
  James put framework together for Server and Client files, researched using date and time functionality. Did testing with various functionality versions of the code either implementing into the code itself or as a seperate bare-bones functionality. Wrote up the README.md file
  Zack looked up the other quotes for the CSV file, assisted with research for time and date functionality
- Both were giving input on programming while on a discord call, screen sharing and looking over various documentation when writing the overarching programs.
+ Both were giving input on programming while on a discord call, screen sharing and looking over various documentation when writing the programs.
 
 Running Program:
 1. Compile both programs in two different terminals.
